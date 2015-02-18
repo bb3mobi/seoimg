@@ -1,10 +1,10 @@
 # SEO Images in Attachment
 
-## OPEN .htaccess
+# OPEN .htaccess
 
-FIND RewriteEngine On
+FIND: RewriteEngine On
 
-ADD AFTER
+ADD AFTER:
 
 RewriteRule ^thumb/(\d+)\.(gif|jpg|jpeg|bmp|png|tiff|tif|tga)$ download/file.php?id=$1&t=1 [NC]
 
