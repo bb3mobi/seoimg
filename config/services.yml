@@ -1,0 +1,5 @@
+services:
+    bb3mobi.seoimg.listener:
+        class: bb3mobi\seoimg\event\listener
+        tags:
+            - { name: event.listener }
