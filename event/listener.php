@@ -90,5 +90,3 @@ class listener implements EventSubscriberInterface
 		return preg_replace("/[^A-ZА-ЯЁ.,-–?]+/ui", " ", $text);
 	}
 }
-
-?>
