@@ -14,6 +14,13 @@ use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 class listener implements EventSubscriberInterface
 {
+	/** @var \phpbb\controller\helper */
+	protected $helper;
+
+	public function __construct(\phpbb\controller\helper $helper)
+	{
+		$this->helper = $helper;
+	}
 
 	static public function getSubscribedEvents()
 	{
@@ -24,7 +31,12 @@ class listener implements EventSubscriberInterface
 
 	public function parse_attachments_modify_template_data($event)
 	{
-		global $topic_data;
+		global $preview;
+
+		if ($preview)
+		{
+			return;
+		}
 
 		switch ($event['display_cat'])
 		{
@@ -32,6 +44,8 @@ class listener implements EventSubscriberInterface
 			case ATTACHMENT_CATEGORY_IMAGE:
 
 				$block_array = $event['block_array'];
+
+				global $topic_data;
 
 				// SEO Description img
 				$attach_comment = $event['attachment']['attach_comment'];
@@ -42,8 +56,19 @@ class listener implements EventSubscriberInterface
 				}
 
 				// SEO link img
-				$inline_link = generate_board_url() ."/small/{$event['attachment']['attach_id']}.{$event['attachment']['extension']}";
-				$download_link = generate_board_url() ."/img/{$event['attachment']['attach_id']}.{$event['attachment']['extension']}";
+				$inline_link = $this->helper->route('bb3mobi_seoimg', array(
+					'mode'	=> 'small',
+					'attach_id'	=> $event['attachment']['attach_id'],
+					'extension'	=> $event['attachment']['extension']),
+					false, '', true
+				);
+				$download_link = $this->helper->route('bb3mobi_seoimg', array(
+					'mode'	=> 'img',
+					'attach_id'	=> $event['attachment']['attach_id'],
+					'extension'	=> $event['attachment']['extension']),
+					false, '', true
+				);
+
 				$block_array['U_INLINE_LINK'] = $inline_link;
 				$block_array['U_DOWNLOAD_LINK'] = $download_link;
 				$block_array['COMMENT'] = '';
@@ -57,6 +82,8 @@ class listener implements EventSubscriberInterface
 
 				$block_array = $event['block_array'];
 
+				global $topic_data;
+
 				// SEO Description img
 				$attach_comment = $event['attachment']['attach_comment'];
 				if ($attach_comment || !empty($topic_data['topic_title']))
@@ -66,8 +93,19 @@ class listener implements EventSubscriberInterface
 				}
 
 				// SEO link img
-				$thumbnail_link = generate_board_url() ."/thumb/{$event['attachment']['attach_id']}.{$event['attachment']['extension']}";
-				$download_link = generate_board_url() ."/pic/{$event['attachment']['attach_id']}.{$event['attachment']['extension']}";
+				$thumbnail_link = $this->helper->route('bb3mobi_seoimg', array(
+					'mode'	=> 'thumb',
+					'attach_id'	=> $event['attachment']['attach_id'],
+					'extension'	=> $event['attachment']['extension']),
+					false, '', true
+				);
+				$download_link = $this->helper->route('bb3mobi_seoimg', array(
+					'mode'	=> 'pic',
+					'attach_id'	=> $event['attachment']['attach_id'],
+					'extension'	=> $event['attachment']['extension']),
+					false, '', true
+				);
+
 				$block_array['THUMB_IMAGE'] = $thumbnail_link;
 				$block_array['U_DOWNLOAD_LINK'] = $download_link;
 

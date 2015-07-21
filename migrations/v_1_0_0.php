@@ -9,16 +9,16 @@
 
 namespace bb3mobi\seoimg\migrations;
 
-class v_0_0_2 extends \phpbb\db\migration\migration
+class v_1_0_0 extends \phpbb\db\migration\migration
 {
 	public function effectively_installed()
 	{
-		return isset($this->config['seoimg_version']) && version_compare($this->config['seoimg_version'], '0.0.2', '>=');
+		return isset($this->config['seoimg_version']) && version_compare($this->config['seoimg_version'], '1.0.0', '>=');
 	}
 
 	static public function depends_on()
 	{
-		return array('\phpbb\db\migration\data\v310\dev');
+		return array('\bb3mobi\seoimg\migrations\v_0_0_2');
 	}
 
 	public function update_schema()
@@ -37,15 +37,7 @@ class v_0_0_2 extends \phpbb\db\migration\migration
 	{
 		return array(
 			// Current version
-			array('config.add', array('seoimg_version', '0.0.2')),
-		);
-	}
-
-	public function revert_data()
-	{
-		return array(
-			// Remove version
-			array('config.remove', array('seoimg_version')),
+			array('config.update', array('seoimg_version', '1.0.0')),
 		);
 	}
 }

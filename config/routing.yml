@@ -1,0 +1,7 @@
+bb3mobi_seoimg:
+    path: /{mode}/{attach_id}.{extension}
+    defaults: { _controller: bb3mobi.seoimg.images:image, mode:'' }
+    requirements:
+        mode: thumb|pic|small|img
+        attach_id: \d+
+        extension: jpg|jpeg|png|gif|bmp|tiff|tif|tga

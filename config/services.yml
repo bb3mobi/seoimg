@@ -1,5 +1,17 @@
 services:
     bb3mobi.seoimg.listener:
         class: bb3mobi\seoimg\event\listener
+        arguments:
+            - @controller.helper
         tags:
             - { name: event.listener }
+    bb3mobi.seoimg.images:
+        class: bb3mobi\seoimg\controller\images
+        arguments:
+            - @user
+            - @auth
+            - @config
+            - @cache.driver
+            - @dbal.conn
+            - %core.root_path%
+            - %core.php_ext%
