@@ -4,4 +4,4 @@ bb3mobi_seoimg:
     requirements:
         mode: thumb|pic|small|img
         attach_id: \d+
-        extension: jpg|jpeg|png|gif|bmp|tiff|tif|tga
+        extension: jpg|jpeg|png|gif

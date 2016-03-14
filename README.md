@@ -1,15 +1,11 @@
 # SEO Images in Attachment
 
-# OPEN .htaccess
+Расширение позволяет просматривать вложенные изображения форума, когда файлы скачивать запрещено.
 
-FIND: RewriteEngine On
+Для phpBB 3.1.x установка:
 
-ADD AFTER:
+Загрузить в папку ext/bb3mobi/seoimg/.
 
-RewriteRule ^thumb/(\d+)\.(gif|jpg|jpeg|bmp|png|tiff|tif|tga)$ download/file.php?id=$1&t=1 [NC]
+Включить в админке на вкладке "Персонализация".
 
-RewriteRule ^pic/(\d+)\.(gif|jpg|jpeg|bmp|png|tiff|tif|tga)$ download/file.php?id=$1&mode=view [NC]
-
-RewriteRule ^small/(\d+)\.(gif|jpg|jpeg|bmp|png|tiff|tif|tga)$ download/file.php?id=$1 [NC]
-
-RewriteRule ^img/(\d+)\.(gif|jpg|jpeg|bmp|png|tiff|tif|tga)$ download/file.php?id=$1 [NC]
+Настроить права доступа(по умолчанию будут применены права для вложений).

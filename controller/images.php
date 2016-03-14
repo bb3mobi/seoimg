@@ -1,10 +1,10 @@
 <?php
 /**
 *
-* @package SEO images in attachment
-* @version $Id: images
-* @copyright BB3.Mobi (c) 2015 Anvar (http://apwa.ru)
-* @license http://opensource.org/licenses/gpl-license.php GNU Public License
+* @package SEO Images in Attachment
+* @copyright BB3.Mobi 2014 (c) Anvar [apwa.ru]
+* @link http://bb3.mobi
+* @license http://opensource.org/licenses/gpl-2.0.php GNU General Public License v2
 *
 */
 
@@ -48,8 +48,6 @@ class images
 	{
 		require($this->phpbb_root_path . 'includes/functions_download' . '.' . $this->php_ext);
 
-		$thumbnail = ($mode == 'thumb' && $mode != 'view') ? true : false;
-
 		$this->user->setup('viewtopic');
 
 		if (!$this->config['allow_attachments'] && !$this->config['allow_pm_attach'])
@@ -64,9 +62,11 @@ class images
 			trigger_error('NO_ATTACHMENT_SELECTED');
 		}
 
-		$sql = 'SELECT attach_id, post_msg_id, topic_id, in_message, poster_id, is_orphan, physical_filename, real_filename, extension, mimetype, filesize, filetime
-			FROM ' . ATTACHMENTS_TABLE . "
-			WHERE attach_id = $attach_id";
+		$sql = 'SELECT attach_id, post_msg_id, topic_id, poster_id, is_orphan, physical_filename, real_filename, extension, mimetype, filesize, filetime
+			FROM ' . ATTACHMENTS_TABLE . '
+			WHERE attach_id = ' . $attach_id . '
+				AND extension = "' . (string) $extension . '"
+				AND in_message = 0';
 		$result = $this->db->sql_query($sql);
 		$attachment = $this->db->sql_fetchrow($result);
 		$this->db->sql_freeresult($result);
@@ -85,7 +85,7 @@ class images
 		{
 			$attachment['physical_filename'] = utf8_basename($attachment['physical_filename']);
 
-			if (!$attachment['in_message'] && !$this->config['allow_attachments'] || $attachment['in_message'] && !$this->config['allow_pm_attach'])
+			if (!$this->config['allow_attachments'])
 			{
 				send_status_line(404, 'Not Found');
 				trigger_error('ATTACHMENT_FUNCTIONALITY_DISABLED');
@@ -96,7 +96,7 @@ class images
 				// We allow admins having attachment permissions to see orphan attachments...
 				$own_attachment = ($this->auth->acl_get('a_attach') || $attachment['poster_id'] == $this->user->data['user_id']) ? true : false;
 
-				if (!$own_attachment || ($attachment['in_message'] && !$this->auth->acl_get('u_pm_download')) || (!$attachment['in_message'] && !$this->auth->acl_get('u_download')))
+				if (!$own_attachment || !$this->auth->acl_get('u_download'))
 				{
 					send_status_line(404, 'Not Found');
 					trigger_error('ERROR_NO_ATTACHMENT');
@@ -107,29 +107,27 @@ class images
 			}
 			else
 			{
-				if (!$attachment['in_message'])
+				$sql = 'SELECT forum_id, post_visibility
+					FROM ' . POSTS_TABLE . '
+					WHERE post_id = ' . (int) $attachment['post_msg_id'];
+				$result = $this->db->sql_query($sql);
+				$post_row = $this->db->sql_fetchrow($result);
+				$this->db->sql_freeresult($result);
+
+				if (!$post_row || ($post_row['post_visibility'] != ITEM_APPROVED && !$this->auth->acl_get('m_approve', $post_row['forum_id'])))
 				{
-					phpbb_download_handle_forum_auth($this->db, $this->auth, $attachment['topic_id']);
-
-					$sql = 'SELECT forum_id, post_visibility
-						FROM ' . POSTS_TABLE . '
-						WHERE post_id = ' . (int) $attachment['post_msg_id'];
-					$result = $this->db->sql_query($sql);
-					$post_row = $this->db->sql_fetchrow($result);
-					$this->db->sql_freeresult($result);
-
-					if (!$post_row || ($post_row['post_visibility'] != ITEM_APPROVED && !$this->auth->acl_get('m_approve', $post_row['forum_id'])))
-					{
-						// Attachment of a soft deleted post and the user is not allowed to see the post
-						send_status_line(404, 'Not Found');
-						trigger_error('ERROR_NO_ATTACHMENT');
-					}
+					// Attachment of a soft deleted post and the user is not allowed to see the post
+					send_status_line(404, 'Not Found');
+					trigger_error('ERROR_NO_ATTACHMENT');
 				}
-				else
+				else if (!$this->auth->acl_get('u_download') || (!$this->auth->acl_get('f_download_images', $post_row['forum_id']) && !$this->auth->acl_get('f_download', $post_row['forum_id'])))
 				{
-					// Attachment is in a private message.
-					$post_row = array('forum_id' => false);
-					phpbb_download_handle_pm_auth($this->db, $this->auth, $this->user->data['user_id'], $attachment['post_msg_id']);
+					send_status_line(403, 'Forbidden');
+					if ($this->user->data['is_registered'])
+					{
+						trigger_error('RULES_DOWNLOAD_CANNOT');
+					}
+					trigger_error('SORRY_AUTH_VIEW_ATTACH');
 				}
 
 				$extensions = array();
@@ -153,7 +151,7 @@ class images
 				$display_cat = ATTACHMENT_CATEGORY_NONE;
 			}
 
-			if ($thumbnail)
+			if ($mode == 'thumb')
 			{
 				$attachment['physical_filename'] = 'thumb_' . $attachment['physical_filename'];
 			}
@@ -161,6 +159,11 @@ class images
 			{
 				send_status_line(403, 'Forbidden');
 				trigger_error($this->user->lang('FILE_NOT_FOUND', $attachment['attach_id'] . '.' . $extension));
+			}
+
+			if ($mode == 'pic' || $mode == 'img')
+			{
+				$mode = 'view';
 			}
 
 			if ($display_cat == ATTACHMENT_CATEGORY_IMAGE && $mode === 'view' && (strpos($attachment['mimetype'], 'image') === 0) && (strpos(strtolower($this->user->browser), 'msie') !== false) && !phpbb_is_greater_ie_version($this->user->browser, 7))
