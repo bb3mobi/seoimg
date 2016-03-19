@@ -115,19 +115,18 @@ class listener implements EventSubscriberInterface
 
 	public function parse_attachments_modify_template_data($event)
 	{
+		$attachment = $event['attachment'];
+		if ($attachment['in_message'])
+		{
+			return;
+		}
+
 		switch ($event['display_cat'])
 		{
 			// Images
 			case ATTACHMENT_CATEGORY_IMAGE:
 			case ATTACHMENT_CATEGORY_THUMB:
-				global $topic_data, $preview;
-
-				$attachment = $event['attachment'];
-
-				if ($preview || $attachment['in_message'])
-				{
-					return;
-				}
+				global $topic_data;
 
 				$block_array = $event['block_array'];
 

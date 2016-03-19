@@ -16,7 +16,7 @@ services:
             - @user
             - @auth
             - @config
-            - @cache.driver
+            - @cache
             - @dbal.conn
             - %core.root_path%
             - %core.php_ext%
