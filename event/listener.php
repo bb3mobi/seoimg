@@ -47,6 +47,7 @@ class listener implements EventSubscriberInterface
 		return array(
 			'core.viewtopic_modify_post_data'	=> 'attach_list_image_auth',
 			'core.parse_attachments_modify_template_data'	=> 'parse_attachments_modify_template_data',
+			'core.permissions'					=> 'add_permission',
 		);
 	}
 
@@ -191,6 +192,20 @@ class listener implements EventSubscriberInterface
 
 		// Block add
 		$event['block_array'] = $block_array;
+	}
+
+	/**
+	 * Add permissions
+	 *
+	 * @param object $event The event object
+	 * @return null
+	 * @access public
+	 */
+	public function add_permission($event)
+	{
+		$permissions = $event['permissions'];
+		$permissions['f_download_images'] = array('lang' => 'ACL_F_DOWNLOAD_IMAGES', 'cat' => 'misc');
+		$event['permissions'] = $permissions;
 	}
 
 	private function strip_code($text)
