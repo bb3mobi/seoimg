@@ -21,7 +21,7 @@ class images
 	/** @var \phpbb\config\config */
 	protected $config;
 
-	/** @var \phpbb\cache\driver\driver_interface */
+	/** @var \phpbb\cache\service */
 	protected $cache;
 
 	/** @var \phpbb\db\driver\driver_interface */

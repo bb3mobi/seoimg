@@ -45,7 +45,7 @@ class listener implements EventSubscriberInterface
 	static public function getSubscribedEvents()
 	{
 		return array(
-			'core.viewtopic_modify_post_data'	=> 'attach_list_image_auth',
+			'core.viewtopic_modify_post_data'	=> array('attach_list_image_auth', -2),
 			'core.parse_attachments_modify_template_data'	=> 'parse_attachments_modify_template_data',
 			'core.permissions'					=> 'add_permission',
 		);
@@ -53,21 +53,29 @@ class listener implements EventSubscriberInterface
 
 	public function attach_list_image_auth($event)
 	{
-		$forum_id = $event['forum_id'];
-		if (!$this->auth->acl_get('u_download') || $this->auth->acl_get('f_download', $forum_id) || (!$this->auth->acl_get('f_download', $forum_id) && !$this->auth->acl_get('f_download_images', $forum_id)))
+		/*
+		** Проверяем если есть вложения для вывода то дальнейшая работа не требуется
+		** Если конкретному пользователю запрещено скачивать файлы, прерываем работу
+		*/
+		if (sizeof($event['attachments']) || !$this->auth->acl_get('u_download'))
 		{
 			return;
 		}
 
 		// Pull attachment data
 		$attach_list = array();
-		foreach ($event['rowset'] as $row)
+
+		// Проверяем права доступа для скачиваний изображений в определённом форуме
+		if ($this->auth->acl_get('f_download_images', $event['forum_id']))
 		{
-			if (!$row['post_attachment'])
+			foreach ($event['rowset'] as $row)
 			{
-				continue;
+				if (!$row['post_attachment'])
+				{
+					continue;
+				}
+				$attach_list[] = $row['post_id'];
 			}
-			$attach_list[] = $row['post_id'];
 		}
 
 		if (sizeof($attach_list))
@@ -94,6 +102,7 @@ class listener implements EventSubscriberInterface
 					break;
 
 					default:
+						// Добавляем ссылку для авторизации при прочих вложениях
 						$row['attach_comment'] = $this->user->lang['SORRY_AUTH_DOWNLOAD_ATTACH'];
 						if (!$this->user->data['is_registered'])
 						{
@@ -204,7 +213,7 @@ class listener implements EventSubscriberInterface
 	public function add_permission($event)
 	{
 		$permissions = $event['permissions'];
-		$permissions['f_download_images'] = array('lang' => 'ACL_F_DOWNLOAD_IMAGES', 'cat' => 'misc');
+		$permissions['f_download_images'] = array('lang' => 'ACL_F_DOWNLOAD_IMAGES', 'cat' => 'actions');
 		$event['permissions'] = $permissions;
 	}
 
