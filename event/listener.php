@@ -45,8 +45,8 @@ class listener implements EventSubscriberInterface
 	static public function getSubscribedEvents()
 	{
 		return array(
-			'core.viewtopic_modify_post_data'	=> array('attach_list_image_auth', -2),
-			'core.parse_attachments_modify_template_data'	=> 'parse_attachments_modify_template_data',
+			'core.viewtopic_modify_post_data'	=> 'attach_list_image_auth',
+			'core.parse_attachments_modify_template_data'	=>  array('parse_attachments_modify_template_data', -1),
 			'core.permissions'					=> 'add_permission',
 		);
 	}
@@ -127,6 +127,11 @@ class listener implements EventSubscriberInterface
 	{
 		$attachment = $event['attachment'];
 		if ($attachment['in_message'])
+		{
+			return;
+		}
+
+		if (!$this->auth->acl_get('f_download_images', $event['forum_id']))
 		{
 			return;
 		}

@@ -161,12 +161,12 @@ class images
 				trigger_error($this->user->lang('FILE_NOT_FOUND', $attachment['attach_id'] . '.' . $extension));
 			}
 
-			if ($mode == 'pic' || $mode == 'img')
+			if ($mode == 'pic')
 			{
-				$mode = 'view';
+				$mode = 'img';
 			}
 
-			if ($display_cat == ATTACHMENT_CATEGORY_IMAGE && $mode === 'view' && (strpos($attachment['mimetype'], 'image') === 0) && (strpos(strtolower($this->user->browser), 'msie') !== false) && !phpbb_is_greater_ie_version($this->user->browser, 7))
+			if ($display_cat == ATTACHMENT_CATEGORY_IMAGE && $mode === 'img' && (strpos($attachment['mimetype'], 'image') === 0) && (strpos(strtolower($this->user->browser), 'msie') !== false) && !phpbb_is_greater_ie_version($this->user->browser, 7))
 			{
 				wrap_img_in_html(append_sid($this->phpbb_root_path . 'download/file.' . $this->php_ext, 'id=' . $attachment['attach_id']), $attachment['real_filename']);
 				file_gc();
